@@ -1,0 +1,616 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Ficha de Personagem</title>
+  <link href="https://fonts.googleapis.com/css2?family=Cinzel:wght@400;600;700&family=Crimson+Pro:ital,wght@0,300;0,400;0,600;1,300;1,400&display=swap" rel="stylesheet"/>
+  <link rel="stylesheet" href="/ficha-dnd.css"/>
+</head>
+<body>
+
+  <!-- ================================================
+       HEADER FIXO — visível em todas as abas
+       ================================================ -->
+  <div id="char-header">
+
+    <div id="char-portrait" onclick="document.getElementById('portrait-input').click()">
+      <div class="ph" id="portrait-placeholder">⚔</div>
+      <img id="portrait-img" style="display:none" alt="Retrato do personagem"/>
+      <input type="file" id="portrait-input" accept="image/*"/>
+    </div>
+
+    <div class="char-info-header">
+      <div class="char-name-header" id="hdr-name" contenteditable>Elaria Ventosbrancos</div>
+      <div class="char-meta-header">
+        <span id="hdr-class" contenteditable>Maga 5</span>
+        <span id="hdr-race"  contenteditable>Elfo</span>
+        <span id="hdr-align" contenteditable>Caótico Neutro</span>
+      </div>
+    </div>
+
+    <div class="quick-stats">
+      <div class="qs-box" onclick="focusHP()">
+        <div class="qs-label">HP</div>
+        <div class="qs-val hp" id="hdr-hp">32/38</div>
+      </div>
+      <div class="qs-box">
+        <div class="qs-label">CA</div>
+        <div class="qs-val ca" id="hdr-ca">13</div>
+      </div>
+      <div class="qs-box">
+        <div class="qs-label">INI</div>
+        <div class="qs-val ini" id="hdr-ini">+2</div>
+      </div>
+    </div>
+
+  </div><!-- /#char-header -->
+
+
+  <!-- ================================================
+       CONTEÚDO PRINCIPAL
+       ================================================ -->
+  <div id="app">
+
+    <!-- ============================================
+         ABA 1 — FICHA
+         ============================================ -->
+    <div class="tab-content active" id="tab-ficha">
+
+      <!-- Atributos -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>✦ Atributos</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb" style="padding:6px;">
+          <div class="hex-grid" id="hex-grid"></div>
+          <div class="divider">· · ·</div>
+          <div style="display:flex;justify-content:center;gap:16px;padding:4px 0;">
+            <div style="text-align:center;">
+              <div style="font-size:9px;color:var(--text3);font-family:'Cinzel',serif;">BÔNUS PROF</div>
+              <div style="font-family:'Cinzel',serif;font-size:18px;color:var(--gold2);" id="prof-bonus-disp">+3</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:9px;color:var(--text3);font-family:'Cinzel',serif;">NÍVEL</div>
+              <div style="font-family:'Cinzel',serif;font-size:18px;color:var(--gold2);" id="char-level-disp">5</div>
+            </div>
+            <div style="text-align:center;">
+              <div style="font-size:9px;color:var(--text3);font-family:'Cinzel',serif;">INSPIRAÇÃO</div>
+              <div id="insp-dot" onclick="toggleInspiration()"
+                   style="width:24px;height:24px;border-radius:50%;border:2px solid var(--border2);
+                          background:var(--bg3);cursor:pointer;margin:4px auto 0;transition:all 0.15s;">
+              </div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /Atributos -->
+
+      <!-- Vitais -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>❤ Vitais</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="vitals-grid">
+
+            <!-- HP -->
+            <div class="vbox" style="grid-column:1/-1;">
+              <div class="vlabel">Pontos de Vida</div>
+              <div style="display:flex;align-items:baseline;justify-content:center;gap:4px;">
+                <div class="vval" style="color:#e05050;" id="hp-atual" contenteditable>32</div>
+                <div style="color:var(--text3);font-size:18px;">/</div>
+                <div class="vval" style="font-size:18px;color:var(--text2);" id="hp-max" contenteditable>38</div>
+              </div>
+              <div class="hp-row">
+                <button class="btn-sm r" onclick="adjustHP(-1)">−1</button>
+                <button class="btn-sm r" onclick="adjustHP(-5)">−5</button>
+                <input type="number" id="hp-delta" placeholder="Δ"/>
+                <button class="btn-sm t" onclick="applyHPDelta()">Aplicar</button>
+                <button class="btn-sm t" onclick="healFull()">Max</button>
+              </div>
+            </div>
+
+            <div class="vbox">
+              <div class="vlabel">CA</div>
+              <div class="vval" style="color:var(--teal2);" id="ca-val" contenteditable>13</div>
+            </div>
+            <div class="vbox">
+              <div class="vlabel">Iniciativa</div>
+              <div class="vval" style="color:var(--purple2);" id="ini-val" contenteditable>+2</div>
+            </div>
+            <div class="vbox">
+              <div class="vlabel">Deslocamento</div>
+              <div class="vval" style="color:var(--gold2);" id="move-val" contenteditable>9m</div>
+            </div>
+            <div class="vbox">
+              <div class="vlabel">HP Temp</div>
+              <div class="vval" style="color:#e0a050;" id="hp-temp" contenteditable>0</div>
+            </div>
+
+          </div><!-- /.vitals-grid -->
+
+          <!-- Testes contra a morte -->
+          <div style="margin-top:12px;">
+            <div style="font-size:11px;color:var(--text3);font-family:'Cinzel',serif;
+                        letter-spacing:0.05em;margin-bottom:6px;">TESTES CONTRA A MORTE</div>
+            <div class="ds-row">
+              <span class="dslabel" style="color:var(--teal2);">✦ Sucesso</span>
+              <div class="ds-dots" id="ds-s">
+                <div class="dsdot" onclick="toggleDS('s',0)"></div>
+                <div class="dsdot" onclick="toggleDS('s',1)"></div>
+                <div class="dsdot" onclick="toggleDS('s',2)"></div>
+              </div>
+            </div>
+            <div class="ds-row">
+              <span class="dslabel" style="color:var(--red2);">✦ Falha</span>
+              <div class="ds-dots" id="ds-f">
+                <div class="dsdot" onclick="toggleDS('f',0)"></div>
+                <div class="dsdot" onclick="toggleDS('f',1)"></div>
+                <div class="dsdot" onclick="toggleDS('f',2)"></div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Dados de vida -->
+          <div style="margin-top:10px;display:flex;gap:10px;align-items:center;">
+            <div class="vlabel">Dados de Vida:</div>
+            <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--gold2);" contenteditable>5d6</div>
+            <div style="color:var(--text3);font-size:12px;">usados:</div>
+            <div style="font-family:'Cinzel',serif;font-size:14px;color:var(--text2);" contenteditable>2</div>
+          </div>
+
+        </div>
+      </div><!-- /Vitais -->
+
+      <!-- Personagem -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>⚜ Personagem</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="fgrid">
+            <div class="fg">
+              <label>Nome</label>
+              <input id="char-name" oninput="syncHeader()"/>
+            </div>
+            <div class="fg">
+              <label>Classe</label>
+              <input id="char-class" value="Maga 5" oninput="syncHeader()"/>
+            </div>
+            <div class="fg">
+              <label>Raça</label>
+              <input id="char-race" oninput="syncHeader()"/>
+            </div>
+            <div class="fg">
+              <label>Antecedente</label>
+              <input id="char-antecedent" oninput="syncHeader()"/>
+            </div>  
+            <div class="fg full">
+              <label>Alinhamento</label>
+              <input id="char-align" oninput="syncHeader()"/>
+            </div>
+            <div class="fg full">
+              <label>Traços de Personalidade</label>
+              <textarea>Curiosa sobre todos os mistérios do mundo.</textarea>
+            </div>
+            <div class="fg">
+              <label>Ideais</label>
+              <textarea style="min-height:50px;">Conhecimento acima de tudo.</textarea>
+            </div>
+            <div class="fg">
+              <label>Vínculos</label>
+              <textarea style="min-height:50px;">Proteger o grimório a qualquer custo.</textarea>
+            </div>
+            <div class="fg full">
+              <label>Fraquezas</label>
+              <textarea style="min-height:50px;">Arrogante quando se trata de magia.</textarea>
+            </div>
+          </div>
+        </div>
+      </div><!-- /Personagem -->
+
+      <!-- Talentos -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>★ Talentos</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="talentos-grid" id="talentos-list"></div>
+          <button class="btn-add" onclick="openTalentoModal(null)">+ Adicionar Talento</button>
+        </div>
+      </div><!-- /Talentos -->
+
+      <!-- Características -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>⚡ Características</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div id="caracList"></div>
+          <button class="btn-add" onclick="openCaracModal(null)">+ Adicionar Característica</button>
+        </div>
+      </div><!-- /Características -->
+
+    </div><!-- /#tab-ficha -->
+
+
+    <!-- ============================================
+         ABA 2 — MAGIAS
+         ============================================ -->
+    <div class="tab-content" id="tab-magias">
+
+      <!-- Estatísticas de magia -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>✧ Estatísticas de Magia</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="spell-stats-row">
+            <div class="ssbox"><div class="ssl">ATRIBUTO</div><div class="ssv" contenteditable>INT</div></div>
+            <div class="ssbox"><div class="ssl">CD DO TR</div><div class="ssv" contenteditable>14</div></div>
+            <div class="ssbox"><div class="ssl">ATAQUE</div>  <div class="ssv" contenteditable>+6</div></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Slots -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>◈ Slots de Magia</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="slots-grid" id="slots-grid"></div>
+          <button class="btn-sm t" style="margin-top:10px;" onclick="resetSlots()">
+            Descanso — Reset Slots
+          </button>
+        </div>
+      </div>
+
+      <!-- Preparadas -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>⚡ Preparadas</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="prep-list" id="prepared-list"></div>
+          <div style="font-size:12px;color:var(--text3);margin-top:6px;">
+            Marque magias como preparadas no Grimório ↓
+          </div>
+        </div>
+      </div>
+
+      <!-- Grimório -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>📖 Grimório</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="spells-grid" id="spells-grid"></div>
+          <button class="btn-add" onclick="openSpellForm(null)">+ Adicionar Magia</button>
+        </div>
+      </div>
+
+    </div><!-- /#tab-magias -->
+
+
+    <!-- ============================================
+         ABA 3 — INVENTÁRIO
+         ============================================ -->
+    <div class="tab-content" id="tab-inventario">
+
+      <!-- Moedas -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>💰 Moedas</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div class="coins-grid">
+            <div class="coin-box gold">
+              <div class="coin-symbol">🪙</div>
+              <div class="coin-label">OURO</div>
+              <div class="coin-value" id="coin-gold" contenteditable>45</div>
+            </div>
+            <div class="coin-box silver">
+              <div class="coin-symbol">🥈</div>
+              <div class="coin-label">PRATA</div>
+              <div class="coin-value" id="coin-silver" contenteditable>120</div>
+            </div>
+            <div class="coin-box copper">
+              <div class="coin-symbol">🟤</div>
+              <div class="coin-label">COBRE</div>
+              <div class="coin-value" id="coin-copper" contenteditable>33</div>
+            </div>
+            <div class="coin-box diamond">
+              <div class="coin-symbol">💎</div>
+              <div class="coin-label">DIAMANTE</div>
+              <div class="coin-value" id="coin-diamond" contenteditable>0</div>
+            </div>
+          </div>
+        </div>
+      </div><!-- /Moedas -->
+
+      <!-- Armas -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>⚔ Armas</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div id="weapons-list"></div>
+          <button class="btn-add" onclick="openWeaponModal(null)">+ Adicionar Arma</button>
+        </div>
+      </div><!-- /Armas -->
+
+      <!-- Itens -->
+      <div class="sc">
+        <div class="sh" onclick="toggleSection(this)">
+          <h2>🎒 Itens &amp; Equipamentos</h2>
+          <span class="stog">▼</span>
+        </div>
+        <div class="sb">
+          <div id="items-list"></div>
+          <button class="btn-add" onclick="openItemModal(null)">+ Adicionar Item</button>
+        </div>
+      </div><!-- /Itens -->
+
+    </div><!-- /#tab-inventario -->
+
+  </div><!-- /#app -->
+
+
+  <!-- ================================================
+       BARRA DE ABAS (BOTTOM)
+       ================================================ -->
+  <div id="tab-bar">
+    <button class="tab-btn active" id="tbtn-ficha"      onclick="switchTab('ficha')">
+      <span class="tab-icon">📜</span>Ficha
+    </button>
+    <button class="tab-btn"        id="tbtn-magias"     onclick="switchTab('magias')">
+      <span class="tab-icon">✨</span>Magias
+    </button>
+    <button class="tab-btn"        id="tbtn-inventario" onclick="switchTab('inventario')">
+      <span class="tab-icon">🎒</span>Inventário
+    </button>
+  </div>
+
+
+  <!-- ================================================
+       POPUP DE ATRIBUTO
+       ================================================ -->
+  <div id="stat-popup">
+    <div class="popup-header">
+      <span id="popup-title">Atributo</span>
+      <div style="display:flex;gap:6px;align-items:center;">
+        <button class="ebtn" onclick="openStatEdit()">✎ Editar</button>
+        <span class="popup-close" onclick="closePopup()">✕</span>
+      </div>
+    </div>
+    <div id="popup-content"></div>
+  </div>
+
+
+  <!-- ================================================
+       MODAL — EDITAR ATRIBUTO
+       ================================================ -->
+  <div class="moverlay" id="stat-edit-overlay" onclick="closeStatEdit(event)">
+    <div class="msheet">
+      <div class="mhdr">
+        <span class="mtitle" id="se-title">Editar Atributo</span>
+        <button class="mclose" onclick="closeStatEditDirect()">✕</button>
+      </div>
+      <div class="fg">
+        <label>Valor do Atributo</label>
+        <input type="number" id="se-value" min="1" max="30"/>
+      </div>
+      <div class="fg" id="se-save-row">
+        <label>Teste de Resistência</label>
+        <div style="display:flex;align-items:center;gap:10px;padding-top:4px;">
+          <div id="se-save-tog" onclick="toggleSeSave()"
+               style="width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);
+                      background:var(--bg3);cursor:pointer;transition:all 0.15s;" data-on="0">
+          </div>
+          <span style="font-size:13px;color:var(--text2);" id="se-save-lbl">Não proficiente</span>
+        </div>
+      </div>
+      <div class="fg" id="se-skills-section" style="display:none;">
+        <label>Perícias — marque as proficientes</label>
+        <div id="se-skills-list" style="margin-top:8px;display:flex;flex-direction:column;gap:8px;"></div>
+      </div>
+      <button class="msave" onclick="saveStatEdit()">Salvar</button>
+    </div>
+  </div>
+
+
+  <!-- ================================================
+       MODAL — TALENTO
+       ================================================ -->
+  <div class="moverlay" id="talento-moverlay" onclick="closeTalentoModal(event)">
+    <div class="msheet">
+      <div class="mhdr">
+        <span class="mtitle" id="tal-mtitle">Talento</span>
+        <button class="mclose" onclick="closeTalentoModalDirect()">✕</button>
+      </div>
+      <div class="fg"><label>Nome do Talento</label><input id="tal-name" placeholder="Ex: Mente Aguçada"/></div>
+      <div class="fg"><label>Descrição</label><textarea id="tal-desc" placeholder="O que este talento permite fazer..."></textarea></div>
+      <div class="fg"><label>Bônus / Modificador</label><input id="tal-bonus" placeholder="Ex: +1 INT, Vantagem em Percepção..."/></div>
+      <button class="msave" onclick="saveTalento()">Salvar Talento</button>
+      <button class="mdel"  id="tal-del-btn" onclick="deleteTalento()" style="display:none;">Remover Talento</button>
+    </div>
+  </div>
+
+
+  <!-- ================================================
+       MODAL — CARACTERÍSTICA
+       ================================================ -->
+  <div class="moverlay" id="carac-moverlay" onclick="closeCaracModal(event)">
+    <div class="msheet">
+      <div class="mhdr">
+        <span class="mtitle" id="carac-mtitle">Característica</span>
+        <button class="mclose" onclick="closeCaracModalDirect()">✕</button>
+      </div>
+      <div class="fg"><label>Nome</label><input id="carac-name" placeholder="Ex: Recuperação Arcana"/></div>
+      <div class="fg"><label>Descrição</label><textarea id="carac-desc" placeholder="Descreva o efeito..."></textarea></div>
+      <button class="msave" onclick="saveCarac()">Salvar</button>
+      <button class="mdel"  id="carac-del-btn" onclick="deleteCarac()" style="display:none;">Remover</button>
+    </div>
+  </div>
+
+
+  <!-- ================================================
+       MODAL — FORMULÁRIO DE MAGIA (adicionar / editar)
+       ================================================ -->
+  <div class="moverlay" id="spell-form-overlay" onclick="closeSpellForm(event)">
+    <div class="msheet">
+      <div class="mhdr">
+        <span class="mtitle" id="sf-title">Nova Magia</span>
+        <button class="mclose" onclick="closeSpellFormDirect()">✕</button>
+      </div>
+      <div class="fgrid">
+        <div class="fg full"><label>Nome da Magia</label><input id="sf-name" placeholder="Ex: Bola de Fogo"/></div>
+        <div class="fg"><label>Nível (0=Truque)</label><input id="sf-level" type="number" min="0" max="9" value="1"/></div>
+        <div class="fg">
+          <label>Escola</label>
+          <select id="sf-school">
+            <option value="evocação">Evocação</option>
+            <option value="transmutação">Transmutação</option>
+            <option value="encantamento">Encantamento</option>
+            <option value="necromancia">Necromancia</option>
+            <option value="ilusão">Ilusão</option>
+            <option value="adivinhação">Adivinhação</option>
+            <option value="conjuração">Conjuração</option>
+            <option value="abjuração">Abjuração</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Tempo de Ação</label>
+          <select id="sf-action">
+            <option>1 ação</option>
+            <option>1 ação bônus</option>
+            <option>1 reação</option>
+            <option>1 minuto</option>
+            <option>10 minutos</option>
+            <option>1 hora</option>
+          </select>
+        </div>
+        <div class="fg"><label>Distância</label>  <input id="sf-range"      placeholder="Ex: 18m"/></div>
+        <div class="fg"><label>Duração</label>     <input id="sf-duration"   placeholder="Ex: Concentração 1h"/></div>
+        <div class="fg"><label>Componentes</label> <input id="sf-components" placeholder="V, S, M (palha)"/></div>
+        <div class="fg"><label>Dano / Efeito</label><input id="sf-damage"    placeholder="Ex: 8d6 fogo"/></div>
+        <div class="fg">
+          <label>Origem</label>
+          <select id="sf-origin">
+            <option>Classe</option>
+            <option>Talento</option>
+            <option>Pergaminho</option>
+            <option>Item Mágico</option>
+            <option>Dom</option>
+          </select>
+        </div>
+        <div class="fg">
+          <label>Flags</label>
+          <div style="display:flex;gap:10px;flex-wrap:wrap;padding-top:6px;">
+            <label style="display:flex;gap:5px;align-items:center;font-size:13px;color:var(--text2);">
+              <input type="checkbox" id="sf-ritual"> Ritual
+            </label>
+            <label style="display:flex;gap:5px;align-items:center;font-size:13px;color:var(--text2);">
+              <input type="checkbox" id="sf-conc"> Concentração
+            </label>
+            <label style="display:flex;gap:5px;align-items:center;font-size:13px;color:var(--text2);">
+              <input type="checkbox" id="sf-reaction"> Reação
+            </label>
+          </div>
+        </div>
+        <div class="fg full">
+          <label>Descrição</label>
+          <textarea id="sf-desc" placeholder="Descreva os efeitos da magia..."></textarea>
+        </div>
+      </div>
+      <button class="msave" onclick="saveSpellForm()">Salvar Magia</button>
+      <button class="mdel"  id="sf-del-btn" onclick="deleteSpellForm()" style="display:none;">Remover Magia</button>
+    </div>
+  </div>
+
+
+  <!-- ================================================
+       MODAL — DETALHES DA MAGIA
+       ================================================ -->
+  <div class="moverlay" id="spell-detail-overlay" onclick="closeSpellDetail(event)">
+    <div class="msheet">
+      <div class="mhdr">
+        <span class="mtitle" id="sd-title">Magia</span>
+        <button class="mclose" onclick="closeSpellDetailDirect()">✕</button>
+      </div>
+      <div id="sd-body"></div>
+    </div>
+  </div>
+
+
+  <!-- ================================================
+       MODAL — ARMA
+       ================================================ -->
+  <div class="moverlay" id="weapon-moverlay" onclick="closeWeaponModal(event)">
+    <div class="msheet">
+      <div class="mhdr">
+        <span class="mtitle" id="wm-title">Arma</span>
+        <button class="mclose" onclick="closeWeaponModalDirect()">✕</button>
+      </div>
+      <div class="fg"><label>Nome da Arma</label><input id="wm-name" placeholder="Ex: Espada Longa"/></div>
+      <div class="fgrid">
+        <div class="fg"><label>Bônus de Ataque</label><input id="wm-bonus"  placeholder="Ex: +5"/></div>
+        <div class="fg"><label>Dano</label>            <input id="wm-damage" placeholder="Ex: 1d8+3 cortante"/></div>
+        <div class="fg">
+          <label>Estado</label>
+          <select id="wm-state">
+            <option>Equipado</option>
+            <option>Guardado</option>
+            <option>Perdido</option>
+          </select>
+        </div>
+        <div class="fg"><label>Tipo</label><input id="wm-type" placeholder="Marcial, Simples..."/></div>
+        <div class="fg full"><label>Notas</label><input id="wm-notes" placeholder="Foco arcano, jogável..."/></div>
+      </div>
+      <button class="msave" onclick="saveWeapon()">Salvar Arma</button>
+      <button class="mdel"  id="wm-del-btn" onclick="deleteWeapon()" style="display:none;">Remover Arma</button>
+    </div>
+  </div>
+
+
+  <!-- ================================================
+       MODAL — ITEM
+       ================================================ -->
+  <div class="moverlay" id="item-moverlay" onclick="closeItemModal(event)">
+    <div class="msheet">
+      <div class="mhdr">
+        <span class="mtitle" id="im-title">Item</span>
+        <button class="mclose" onclick="closeItemModalDirect()">✕</button>
+      </div>
+      <div class="fg"><label>Nome do Item</label><input id="im-name" placeholder="Ex: Poção de Cura"/></div>
+      <div class="fgrid">
+        <div class="fg"><label>Quantidade</label><input id="im-qty"   type="number" min="1" value="1"/></div>
+        <div class="fg"><label>Valor</label>      <input id="im-value" placeholder="Ex: 50po"/></div>
+      </div>
+      <div class="fg">
+        <label>Descrição</label>
+        <textarea id="im-desc" placeholder="Para que serve, efeitos, origem..."></textarea>
+      </div>
+      <button class="msave" onclick="saveItem()">Salvar Item</button>
+      <button class="mdel"  id="im-del-btn" onclick="deleteItem()" style="display:none;">Remover Item</button>
+    </div>
+  </div>
+
+
+  <!-- Script principal — carregado após o DOM -->
+  <script src="/js/app.js"></script>
+
+</body>
+</html>

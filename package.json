@@ -1,0 +1,27 @@
+{
+  "name": "dnd-character-page",
+  "version": "1.0.0",
+  "description": "Pagina de personagem do Ded",
+  "main": "index.js",
+  "scripts": {
+    "migrate": "node backend/migration.js",
+    "server":  "node backend/server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alrs-Leiria/Dnd-Character-Page.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/Alrs-Leiria/Dnd-Character-Page/issues"
+  },
+  "homepage": "https://github.com/Alrs-Leiria/Dnd-Character-Page#readme",
+  "dependencies": {
+    "better-sqlite3": "^12.10.0",
+    "cors": "^2.8.6",
+    "express": "^5.2.1"
+  }
+}
