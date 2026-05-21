@@ -1,5 +1,4 @@
 const Character = require("../models/Character");
-const Attribute = require("../models/Attribute");
 
 const db = require('../database');
 
