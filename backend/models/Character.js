@@ -63,14 +63,20 @@ class Character {
         // attribute modifiers
 
         for (const key in this.attributes) {
-
+            
             const attribute =
-                this.attributes[key];
+            this.attributes[key];
+            
+            attribute.id = attribute.description.substring(0, 3).toLowerCase(); 
+
+            attribute.label = attribute.id.toUpperCase();
 
             attribute.modifier =
                 this.modifier(
                     attribute.value
                 );
+            
+            attribute.savingThrow = false;
 
             attribute.skills =
                 this.skills.filter(
@@ -79,6 +85,18 @@ class Character {
                         attribute.description
                 );
         }
+
+        //add level information to skills, for are created with attribute information
+        this.attributes.push(
+            {
+                id: 'level',
+                label: 'Level',
+                value: this.level,
+                modifier: +3,
+                isLevel: true,
+                skills: []
+                }
+        );
     }
 
     get proficiencyBonus() {

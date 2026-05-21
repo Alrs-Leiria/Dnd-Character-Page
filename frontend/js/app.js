@@ -9,7 +9,7 @@
    CONSTANTES E DADOS
    ===================================================== */
 
-let PROF_BONUS = 3;
+let CHARACTER = null;
 
 const STATS = [
   {
@@ -72,7 +72,7 @@ const COLORS = {
   int:   { bg: '#2A4070', t: '#b0c8f5' },
   wis:   { bg: '#3a3a3a', t: '#ddd8cc' },
   cha:   { bg: '#3E2568', t: '#d0b8f5' },
-  nivel: { bg: '#2a2218', t: '#c9a84c' }
+  level: { bg: '#2a2218', t: '#c9a84c' }
 };
 
 const SCHOOL_RUNES = {
@@ -118,7 +118,7 @@ const ORIGIN_RUNES = {
 
 const HEX_LAYOUT = [
   ['str', 'dex'],
-  ['cha', 'nivel', 'con'],
+  ['cha', 'level', 'con'],
   ['int', 'wis']
 ];
 
@@ -126,9 +126,9 @@ const HEX_LAYOUT = [
 /* ── Helpers matemáticos ── */
 function calcMod(value) { return Math.floor((value - 10) / 2); }
 function fmtMod(mod)    { return (mod >= 0 ? '+' : '') + mod; }
-function getStatMod(s)  { return s.isNivel ? s.mod : fmtMod(calcMod(s.value)); }
+function getStatMod(s)  { return s.isLevel ? s.modifier : fmtMod(calcMod(s.value)); }
 function getSkillMod(s, sk) {
-  return sk.prof ? calcMod(s.value) + PROF_BONUS : calcMod(s.value);
+  return sk.proficient ? calcMod(s.value) + PROF_BONUS : calcMod(s.value);
 }
 
 
@@ -146,10 +146,10 @@ function renderHexGrid() {
     rowDiv.style.marginTop = ri === 0 ? '0' : '-18px';
 
     row.forEach(id => {
-      const s = STATS.find(x => x.id === id);
+      const s = CHARACTER.attributes.find(x => x.id === id);
       const c = COLORS[id];
-      const profStars = (!s.isNivel && s.skills)
-        ? s.skills.filter(sk => sk.prof).length
+      const profStars = (!s.isLevel && s.skills)
+        ? s.skills.filter(sk => sk.proficient).length
         : 0;
 
       const wrap = document.createElement('div');
@@ -163,7 +163,7 @@ function renderHexGrid() {
         ${profStars > 0 ? `<span class="hstars">${'*'.repeat(profStars)}</span>` : ''}
         <span class="hlabel" style="color:${c.t}">${s.label}</span>
         <span class="hval"   style="color:${c.t}">${s.value}</span>
-        <span class="hmod"   style="color:${c.t}">${getStatMod(s)}</span>
+        <span class="hmod"   style="color:${c.t}">${s.modifier}</span>
       `;
 
       wrap.appendChild(bg);
@@ -183,11 +183,11 @@ let curStat = null;
 
 function openStatPopup(id, e) {
   curStat = id;
-  const s   = STATS.find(x => x.id === id);
+  const s   = CHARACTER.attributes.find(x => x.id === id);
   const pop = document.getElementById('stat-popup');
   let html  = '';
 
-  if (!s.isNivel) {
+  if (!s.isLevel) {
     const savMod = s.savingThrow
       ? calcMod(s.value) + PROF_BONUS
       : calcMod(s.value);
@@ -214,13 +214,13 @@ function openStatPopup(id, e) {
         html += `
           <div class="prow">
             <span class="plabel">
-              <div class="ptog ${sk.prof ? 'on' : ''}"
+              <div class="ptog ${sk.proficient ? 'on' : ''}"
                    onclick="toggleSkillProf('${id}',${si})"
                    title="Alternar proficiência">
               </div>
               ${sk.name}
             </span>
-            <span class="pval ${sk.prof ? 'prof' : ''}">${fmtMod(m)}</span>
+            <span class="pval ${sk.proficient ? 'prof' : ''}">${fmtMod(m)}</span>
           </div>
         `;
       });
@@ -229,7 +229,7 @@ function openStatPopup(id, e) {
     html += `
       <div class="prow">
         <span class="plabel">Bônus Prof</span>
-        <span class="pval">${s.mod}</span>
+        <span class="pval">${s.modifier}</span>
       </div>
       <div class="prow">
         <span class="plabel">Nível</span>
@@ -262,8 +262,8 @@ document.addEventListener('click', e => {
 });
 
 function toggleSkillProf(statId, si) {
-  const s = STATS.find(x => x.id === statId);
-  s.skills[si].prof = !s.skills[si].prof;
+  const s = CHARACTER.attributes.find(x => x.id === statId);
+  s.skills[si].proficient = !s.skills[si].proficient;
   renderHexGrid();
 
   // Reabre o popup na mesma posição aproximada
@@ -284,7 +284,7 @@ function toggleSkillProf(statId, si) {
 let editStatId = null;
 
 function openStatEdit() {
-  const s = STATS.find(x => x.id === curStat);
+  const s = CHARACTER.attributes.find(x => x.id === curStat);
   if (!s) return;
   editStatId = curStat;
   closePopup();
@@ -296,7 +296,7 @@ function openStatEdit() {
   const tog     = document.getElementById('se-save-tog');
   const lbl     = document.getElementById('se-save-lbl');
 
-  if (s.isNivel) {
+  if (s.isLevel) {
     saveRow.style.display = 'none';
     document.getElementById('se-skills-section').style.display = 'none';
   } else {
@@ -316,7 +316,7 @@ function openStatEdit() {
         row.style.cssText = 'display:flex;align-items:center;gap:8px;font-size:13px;color:var(--text2);cursor:pointer;';
         const cb = document.createElement('input');
         cb.type    = 'checkbox';
-        cb.checked = sk.prof;
+        cb.checked = sk.proficient;
         cb.dataset.si = si;
         row.appendChild(cb);
         row.appendChild(document.createTextNode(sk.name));
@@ -341,19 +341,19 @@ function toggleSeSave() {
 }
 
 function saveStatEdit() {
-  const s = STATS.find(x => x.id === editStatId);
+  const s = CHARACTER.attributes.find(x => x.id === editStatId);
   if (!s) return;
 
   const newVal = parseInt(document.getElementById('se-value').value) || s.value;
   s.value = Math.max(1, Math.min(30, newVal));
 
-  if (!s.isNivel) {
+  if (!s.isLevel) {
     s.savingThrow = document.getElementById('se-save-tog').dataset.on === '1';
 
     if (s.skills && s.skills.length > 0) {
       document.getElementById('se-skills-list')
         .querySelectorAll('input[type=checkbox]')
-        .forEach((cb, i) => { s.skills[i].prof = cb.checked; });
+        .forEach((cb, i) => { s.skills[i].proficient = cb.checked; });
     }
   }
 
@@ -397,27 +397,32 @@ async function fetchCharacter() {
         `/api/character/${id}`
     );
 
-    const character = await response.json();
+    const returnData = await response.json(); 
 
-    renderCharacter(character);
-}
+    if(returnData == null || returnData.error) {
+        alert("Personagem não encontrado!");
+        return;
+    }
 
-function renderCharacter(character) {
+    CHARACTER = returnData;
+  }
+
+function renderCharacter() {
     document.getElementById(
         "char-name"
-    ).value = character.name;
+    ).value = CHARACTER.name;
 
     document.getElementById(
         "char-race"
-    ).value = character.race;
+    ).value = CHARACTER.race;
 
     document.getElementById(
         "char-align"
-    ).value = character.alignment;
+    ).value = CHARACTER.alignment;
 
     document.getElementById(
         "char-antecedent"
-    ).value = character.antecedent;
+    ).value = CHARACTER.antecedent;
 }
 
 
@@ -1168,9 +1173,12 @@ function closeItemModalDirect() {
    INICIALIZAÇÃO
    ===================================================== */
 
-function init() {
-  fetchCharacter();
-  syncHeader();
+async function init() {
+  await fetchCharacter();
+
+  if(CHARACTER == null) return;
+
+  renderCharacter();
   renderHexGrid();
   renderSlots();
   renderSpells();
@@ -1178,7 +1186,10 @@ function init() {
   renderItems();
   renderTalentos();
   renderCaracs();
+  syncHeader();
   updateHpHeader();
 }
 
-init(); 
+(async () => {
+  await init();
+})();
