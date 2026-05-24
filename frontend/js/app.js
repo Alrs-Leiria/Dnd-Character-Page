@@ -124,11 +124,9 @@ const HEX_LAYOUT = [
 
 
 /* ── Helpers matemáticos ── */
-function calcMod(value) { return Math.floor((value - 10) / 2); }
 function fmtMod(mod)    { return (mod >= 0 ? '+' : '') + mod; }
-function getStatMod(s)  { return s.isLevel ? s.modifier : fmtMod(calcMod(s.value)); }
 function getSkillMod(s, sk) {
-  return sk.proficient ? calcMod(s.value) + PROF_BONUS : calcMod(s.value);
+  return sk.proficient ? s.modifier + CHARACTER.proficiencyBonus : s.modifier;
 }
 
 
@@ -189,13 +187,13 @@ function openStatPopup(id, e) {
 
   if (!s.isLevel) {
     const savMod = s.savingThrow
-      ? calcMod(s.value) + PROF_BONUS
-      : calcMod(s.value);
+      ? s.modifier + CHARACTER.proficiencyBonus 
+      : s.modifier
 
     html += `
       <div class="prow">
         <span class="plabel">Modificador</span>
-        <span class="pval">${fmtMod(calcMod(s.value))}</span>
+        <span class="pval">${fmtMod(s.modifier)}</span>
       </div>
       <div class="prow">
         <span class="plabel">
@@ -210,7 +208,6 @@ function openStatPopup(id, e) {
         font-family:'Cinzel',serif;letter-spacing:0.05em;">PERÍCIAS</div>`;
 
       s.skills.forEach((sk, si) => {
-        const m = getSkillMod(s, sk);
         html += `
           <div class="prow">
             <span class="plabel">
@@ -218,9 +215,9 @@ function openStatPopup(id, e) {
                    onclick="toggleSkillProf('${id}',${si})"
                    title="Alternar proficiência">
               </div>
-              ${sk.name}
+              ${sk.description}
             </span>
-            <span class="pval ${sk.proficient ? 'prof' : ''}">${fmtMod(m)}</span>
+            <span class="pval ${sk.proficient ? 'prof' : ''}">${fmtMod(sk.modifier)}</span>
           </div>
         `;
       });
@@ -319,7 +316,7 @@ function openStatEdit() {
         cb.checked = sk.proficient;
         cb.dataset.si = si;
         row.appendChild(cb);
-        row.appendChild(document.createTextNode(sk.name));
+        row.appendChild(document.createTextNode(sk.description));
         list.appendChild(row);
       });
     } else {

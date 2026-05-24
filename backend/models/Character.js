@@ -51,6 +51,7 @@ class Character {
                     sum + row.level,
                 0
             );
+        this.proficiencyBonus = this.getProficiencyBonus;
 
         this.classesDescription =
             this.classes
@@ -60,12 +61,27 @@ class Character {
                 )
                 .join(" / ");
 
+        
+        // skills modifiers
+
+        for (const skillKey in this.skills) {
+            
+            const skill = this.skills[skillKey];
+            
+            const skillValue = this.modifier(skill.attributeValue);
+
+            skill.modifier = skill.proficient 
+                ? skillValue + this.proficiencyBonus
+                : skillValue;
+        }
+
+
         // attribute modifiers
 
-        for (const key in this.attributes) {
+        for (const atributteKey in this.attributes) {
             
             const attribute =
-            this.attributes[key];
+            this.attributes[atributteKey];
             
             attribute.id = attribute.description.substring(0, 3).toLowerCase(); 
 
@@ -92,14 +108,14 @@ class Character {
                 id: 'level',
                 label: 'Level',
                 value: this.level,
-                modifier: +3,
+                modifier: this.proficiencyBonus,
                 isLevel: true,
                 skills: []
                 }
         );
     }
 
-    get proficiencyBonus() {
+    get getProficiencyBonus() {
 
         const level = this.level;
 
